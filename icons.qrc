@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/icons" >
+        <file alias="document-open-folder.png" >icons/document-open-folder.png</file>
+        <file alias="list-add.png" >icons/list-add.png</file>
+        <file alias="view-refresh.png" >icons/view-refresh.png</file>
+        <file alias="inode-directory.png" >icons/inode-directory.png</file>
+        <file alias="edit-clear.png" >icons/edit-clear.png</file>
+        <file alias="dialog-cancel.png" >icons/dialog-cancel.png</file>
+        <file alias="dialog-ok-apply.png" >icons/dialog-ok-apply.png</file>
+        <file alias="edit-delete.png" >icons/edit-delete.png</file>
+        <file alias="application-exit.png" >icons/application-exit.png</file>
+        <file alias="icon.png" >icons/edit-find.png</file>
+        <file alias="help-about.png" >icons/help-about.png</file>
+        <file alias="process-stop.png" >icons/process-stop.png</file>
+    </qresource>
+    <qresource prefix="/translations" >
+        <file alias="translation_ru.qm" >translations/translation_ru.qm</file>
+    </qresource>
+</RCC>
