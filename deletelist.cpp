@@ -28,6 +28,11 @@ DeleteList::DeleteList()
 	connect(toDelete, SIGNAL(sigCheckItem(QTreeWidgetItem*,bool)), this, SLOT(checkItem(QTreeWidgetItem*,bool)));
 }
 
+DeleteList::~DeleteList()
+{
+	Common::clearTreeWidget(toDelete);
+}
+
 void DeleteList::changeEvent(QEvent* event)
 {
 	if (event->type() == QEvent::LanguageChange)
@@ -41,11 +46,6 @@ void DeleteList::changeEvent(QEvent* event)
 	{
 		QWidget::changeEvent(event);
 	}
-}
-
-DeleteList::~DeleteList()
-{
-	Common::clearTreeWidget(toDelete);
 }
 
 void DeleteList::deleteFiles()
@@ -65,6 +65,7 @@ void DeleteList::setFilesWithCopies(const QSet <QSet <TFile*> * >& new_files)  /
 	{
 		prnt=new QTreeWidgetItem;
 		prnt->setData(0, Qt::DisplayRole, tr("%1 - %2 items").arg((*(set->begin()))->name, QString::number(set->size())));
+		prnt->setData(1, Qt::DisplayRole,(*(set->begin()))->size);
 		foreach (TFile* fil, *set)
 		{
 			item=new QTreeWidgetItem;

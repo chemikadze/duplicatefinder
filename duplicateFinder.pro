@@ -22,4 +22,4 @@ HEADERS += mainwindow.h \
     global.h
 FORMS += 
 RESOURCES += icons.qrc
-CONFIG += release
+CONFIG += debug

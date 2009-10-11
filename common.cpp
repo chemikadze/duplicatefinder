@@ -1,4 +1,5 @@
 #include "common.h"
+#include <QDebug>
 
 namespace Common
 {
@@ -18,6 +19,5 @@ namespace Common
 	{
 		while (tree->topLevelItemCount())
 			dfsRemoveItems(tree->takeTopLevelItem(0));
-		//tree->clear();
 	}
 }

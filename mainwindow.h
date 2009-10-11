@@ -63,6 +63,7 @@ class MainWindow : public QMainWindow
 	QTreeWidget *filList;
 	QTreeWidget *dupList;
 	QSplitter *splitter;
+	QStatusBar *sBar;
 
 	QTranslator *trans;
 

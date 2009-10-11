@@ -76,6 +76,8 @@ void MainWindow::createWidgets()
 	dirEdit=new QLineEdit();
 	dirEdit->setReadOnly(true);
 
+	sBar=this->statusBar();
+
 	openDirButton=new QPushButton(QIcon(":/icons/document-open-folder.png"), tr("Open..."));
 	connect(openDirButton, SIGNAL(clicked()), this, SLOT(openDir()));
 }
@@ -153,12 +155,10 @@ MainWindow::~MainWindow()
 		if (file->duplicates != NULL)
 		{
 			file->duplicates->remove(file);
-			if (file->duplicates->size()==1)
-			{
-				(*(file->duplicates->begin()))->duplicates=NULL;
+			if (file->duplicates->isEmpty())
 				delete file->duplicates;
-			}
 		}
+		files.remove(file);
 		delete file;
 	}
 	Common::clearTreeWidget(filList);
@@ -323,6 +323,7 @@ void MainWindow::selectionChanged()
 
 void MainWindow::readDirEntry()
 {
+	W.clear();
 	bool ok;
 	TFile *file;
 	setWindowFilePath(dir->absolutePath());
@@ -334,10 +335,10 @@ void MainWindow::readDirEntry()
 			if (file->duplicates->isEmpty())
 				delete file->duplicates;
 		}
-		delete file;
 		files.remove(file);
+		delete file;
 	}
-	files.clear();
+	//files.clear();
 	Common::clearTreeWidget(filList);
 	Common::clearTreeWidget(dupList);
 
@@ -365,42 +366,29 @@ void MainWindow::readDirEntry()
 		if (ok)
 		{
 			dir->cd(s);
-            QTime time;
-            time.start();
-			W.clear();
+			QTime time;
+			time.start();
             dfsDir();
-            qDebug() << "Opened in " << time.elapsed() << " msecs";
+			//qDebug() << "Opened in " << time.elapsed() << " msecs";
 		}
 	}
 	filList->expandAll();
 	refreshFiles();
+	W.clear();
+	sBar->showMessage(tr("%1 files found").arg(files.size()));
 }
 
 void MainWindow::dfsDir(QTreeWidgetItem *parent/*=NULL*/)
 {
 	if (W.contains(dir->canonicalPath()))
-	{
         return;
-	}
     else
-        W.insert(dir->canonicalPath());
-	qDebug() << dir->absolutePath();
-	QFileInfoList newFiles;
-	QStringList l_dirs;
+		W.insert(dir->canonicalPath());
+	//qDebug() << dir->absolutePath();
 	TFile *file;
 	QTreeWidgetItem *item;
-	if (hiddenFilesAct->isChecked())
-	{
-		newFiles=dir->entryInfoList(QDir::Files | QDir::Readable | QDir::Hidden, QDir::Name);
-		l_dirs=dir->entryList(QDir::Dirs | QDir::Readable | QDir::NoDotAndDotDot | QDir::Hidden, QDir::Name);
-	}
-	else
-	{
-		newFiles=dir->entryInfoList(QDir::Files | QDir::Readable, QDir::Name);
-		l_dirs=dir->entryList(QDir::Dirs | QDir::Readable | QDir::NoDotAndDotDot, QDir::Name);
-	}
 
-	item=new QTreeWidgetItem;
+	item=new QTreeWidgetItem(parent);
 	item->setData(0, Qt::DisplayRole, dir->dirName());
 	item->setData(0, Qt::DecorationRole, directoryIcon);
 	if (parent != NULL)
@@ -408,7 +396,7 @@ void MainWindow::dfsDir(QTreeWidgetItem *parent/*=NULL*/)
 	else
 		filList->addTopLevelItem(item);
 	parent=item;
-	foreach (QFileInfo fil, newFiles)
+	foreach (const QFileInfo& fil, dir->entryInfoList(QDir::Files | QDir::Readable | (hiddenFilesAct->isChecked() ? QDir::Hidden : QDir::Readable), QDir::Name))
 	{
 		file=new TFile;
 		file->name=fil.fileName();
@@ -418,7 +406,7 @@ void MainWindow::dfsDir(QTreeWidgetItem *parent/*=NULL*/)
 		file->duplicates=NULL;
 		files.insert(file);
 
-		item=new QTreeWidgetItem;
+		item=new QTreeWidgetItem(parent);
 		item->setData(0, Qt::DisplayRole, file->name);
 		item->setData(2, Qt::DisplayRole, file->size);
 		item->setData(3, Qt::DisplayRole, fil.created().toString(Qt::SystemLocaleShortDate));
@@ -431,19 +419,19 @@ void MainWindow::dfsDir(QTreeWidgetItem *parent/*=NULL*/)
 	if (recursive->isChecked())
 	{
         QFileInfo info;
-        QString pth=dir->absolutePath();
-		foreach (QString s, l_dirs)
-		{/*
+		QString pth=dir->absolutePath();
+		foreach (const QString &s, dir->entryList(QDir::Dirs | QDir::Readable | QDir::NoDotAndDotDot | (hiddenFilesAct->isChecked() ? QDir::Hidden : QDir::Readable), QDir::Name))
+		{
 			info.setFile(s);
 			if ( (info.isSymLink() && followSymLinks) ||  !info.isSymLink() )
 			{
-				qDebug() << info.isSymLink();
+				//qDebug() << info.isSymLink();
 				dir->cd(s);
                 dfsDir(parent);
 				dir->cd(pth);
-			}*/
+			}
 			dir->cd(s);
-			qDebug() << dir->absolutePath() << dir->canonicalPath();
+			//qDebug() << dir->absolutePath() << dir->canonicalPath();
 			if ( dir->absolutePath() == dir->canonicalPath() )
 			{
 				dfsDir(parent);
@@ -451,8 +439,6 @@ void MainWindow::dfsDir(QTreeWidgetItem *parent/*=NULL*/)
 			}
 		}
 	}
-	newFiles.clear();
-	l_dirs.clear();
 }
 
 void MainWindow::refreshFiles()
@@ -479,6 +465,7 @@ void MainWindow::scanFinished()
 	sThread->exit();
 	sThread->closeFiles();
 	refreshFiles();
+	sBar->showMessage(tr("%1 files processed, %2 duplicated files found").arg(files.size()).arg(sThread->duplicatedFiles()));
 }
 
 void MainWindow::removeAllCopies()
@@ -542,7 +529,7 @@ void MainWindow::removeCopiesDialog(const QSet <QSet <TFile*> * > & filesWithCop
 			{
 				bytesFreed+=f->size;
 				++filesRemoved;
-				qDebug() << tr("Removed") << f->name.toAscii();
+				//qDebug() << tr("Removed") << f->name.toAscii();
 				if (f->duplicates==NULL)
 				{
 					f->duplicates->remove(f);

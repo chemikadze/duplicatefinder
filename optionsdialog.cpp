@@ -69,7 +69,7 @@ void OptionsDialog::loadSettings()
 		recursive->setChecked(settings->value("recursive", false).toBool());
 		compareNames->setChecked(settings->value("compare_names", false).toBool());
 		hidden->setChecked(settings->value("hidden", false).toBool());
-		qDebug() << settings->value("language", QString("en")).toString();
+		//qDebug() << settings->value("language", QString("en")).toString();
 		if (settings->value("language", QString("en")).toString() == QString("en"))
 			language->setCurrentIndex(0);
 		else

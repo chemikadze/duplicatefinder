@@ -6,16 +6,20 @@
 #include <QSet>
 #include <QDateTime>
 #include <QtGui/QTreeWidgetItem>
+#include <QDebug>
 #include "global.h"
 
-typedef struct SFile
+class TFile
 {
+public:
 	qint64 size;
 	QString name;
 	QString fullName;
-	QSet <struct SFile*> *duplicates;
+	QSet <TFile*> *duplicates;
 	QDateTime created;
 	QTreeWidgetItem *item;
-} TFile;
+	TFile() {}
+};
+
 
 #endif // TFILE_H

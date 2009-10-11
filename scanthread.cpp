@@ -8,6 +8,7 @@ ScanThread::ScanThread()
 
 void ScanThread::run()
 {
+	n_dupFiles = 0;
 	for (i=files->begin(); i!=files->end(); ++i)
 	{
 		if ((*i)->duplicates != NULL)
@@ -20,6 +21,7 @@ void ScanThread::run()
 			delete dup;
 		}
 		fi.setFileName((*i)->fullName);
+		QFileInfo fii(fi);
 		emit processingFile((*i)->name);
 		if (!fi.open(QIODevice::ReadOnly))	// message box?
 			continue;
@@ -35,6 +37,7 @@ void ScanThread::run()
 				(*j)->duplicates->insert(*j);
 				(*j)->duplicates->insert(*i);
 				(*i)->duplicates=(*j)->duplicates;
+				n_dupFiles++;
 				continue;
 			}
 
@@ -45,7 +48,7 @@ void ScanThread::run()
 			}
 			fj.setFileName((*j)->fullName);
 
-			QFileInfo fii(fi), fij(fj);
+			QFileInfo fij(fj);
 			if (fii.canonicalFilePath() == fij.canonicalFilePath())
 			{
 				if ((*j)->duplicates == NULL)
@@ -55,6 +58,7 @@ void ScanThread::run()
 				(*j)->duplicates->insert(*j);
 				(*j)->duplicates->insert(*i);
 				(*i)->duplicates=(*j)->duplicates;
+				n_dupFiles++;
 				continue;
 			}
 
@@ -91,6 +95,7 @@ void ScanThread::run()
 				(*j)->duplicates->insert(*j);
 				(*j)->duplicates->insert(*i);
 				(*i)->duplicates=(*j)->duplicates;
+				n_dupFiles++;
 			}
 			fj.close();
 		}
@@ -123,4 +128,9 @@ void ScanThread::setBlockSize(qint32 size)
 void ScanThread::setCompareNames(bool b)
 {
 	compareNames=b;
+}
+
+int ScanThread::duplicatedFiles()
+{
+	return n_dupFiles;
 }

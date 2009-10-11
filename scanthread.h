@@ -26,12 +26,14 @@ protected:
 	char* datai, *dataj;
 	QSet<TFile*>::iterator i, j;
 	int N, k;
+	int n_dupFiles;
 
 	virtual void run();
 signals:
 	void processingFile(const QString&);
 	void finished();
 public:
+	int  duplicatedFiles();
 	void setCompareNames(bool b);
 	void closeFiles();
 	void setFiles(QSet <TFile*> *f);
